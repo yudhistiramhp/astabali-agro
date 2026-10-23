@@ -1,8 +1,44 @@
 <script setup lang="ts">
 import type { Invoice } from '~/utils/invoice'
 
-const { invoices, setStatus, customers } = useInvoices()
-const { confirm } = useDialog()
+const { invoices, load, setStatus, customers, logout, legacy, importLegacy } = useInvoices()
+const { confirm, notify } = useDialog()
+
+const loading = ref(true)
+const legacyCount = ref(0)
+onMounted(async () => {
+  legacyCount.value = legacy().length
+  try {
+    await load(true)
+  } catch (e: any) {
+    const reason = e?.data?.statusMessage || e?.statusMessage || e?.message || ''
+    await notify({
+      title: 'Gagal memuat data',
+      message: `Periksa koneksi internet lalu muat ulang halaman.${reason ? ' Detail: ' + reason : ''}`,
+      tone: 'danger',
+    })
+  } finally {
+    loading.value = false
+  }
+})
+
+async function migrate() {
+  const ok = await confirm({
+    title: 'Pindahkan data lama?',
+    message: `${legacyCount.value} invoice yang tersimpan di browser ini akan dipindahkan ke database.`,
+    confirmText: 'Ya, Pindahkan',
+  })
+  if (!ok) return
+  const r = await importLegacy()
+  legacyCount.value = legacy().length
+  await notify({
+    title: 'Selesai',
+    message: r.skipped
+      ? `${r.ok} invoice dipindahkan. ${r.skipped} dilewati karena nomornya sudah ada di database.`
+      : `${r.ok} invoice berhasil dipindahkan.`,
+    tone: r.skipped ? 'primary' : 'success',
+  })
+}
 
 const status = ref<'all' | 'unpaid' | 'paid'>('all')
 const month = ref('') // YYYY-MM
@@ -27,7 +63,12 @@ async function toggle(i: Invoice) {
     confirmText: next === 'paid' ? 'Ya, Lunas' : 'Ya, Belum Bayar',
     tone: next === 'paid' ? 'success' : 'primary',
   })
-  if (ok) setStatus(i.id, next)
+  if (!ok) return
+  try {
+    await setStatus(i.id, next)
+  } catch {
+    await notify({ title: 'Gagal mengubah status', message: 'Periksa koneksi internet lalu coba lagi.', tone: 'danger' })
+  }
 }
 
 const toDate = (iso: string) => {
@@ -97,7 +138,17 @@ async function exportXlsx() {
   <div class="wrap">
     <div class="topbar">
       <h1>Astabali Agro · Invoice</h1>
-      <NuxtLink to="/invoice/new" class="btn btn-primary">+ Invoice Baru</NuxtLink>
+      <div class="row">
+        <NuxtLink to="/invoice/new" class="btn btn-primary">+ Invoice Baru</NuxtLink>
+        <button class="btn" @click="logout">Keluar</button>
+      </div>
+    </div>
+
+    <div v-if="legacyCount" class="card">
+      <div style="margin-bottom: 10px">
+        Ada <b>{{ legacyCount }}</b> invoice lama tersimpan di browser ini. Pindahkan ke database supaya muncul di semua perangkat.
+      </div>
+      <button class="btn btn-primary" @click="migrate">Pindahkan ke database</button>
     </div>
 
     <div class="summary">
@@ -128,7 +179,8 @@ async function exportXlsx() {
     </div>
 
     <div class="card">
-      <div v-if="!list.length" class="empty">Belum ada invoice.</div>
+      <div v-if="loading" class="empty">Memuat…</div>
+      <div v-else-if="!list.length" class="empty">Belum ada invoice.</div>
       <div v-for="i in list" :key="i.id" class="inv">
         <NuxtLink :to="`/invoice/${i.id}`" class="main">
           <div class="no">{{ i.number }} · {{ i.customer || '-' }}</div>

@@ -3,9 +3,12 @@ import type { Invoice, InvoiceItem } from '~/utils/invoice'
 
 const route = useRoute()
 const { confirm, notify } = useDialog()
-const { invoices, get, blank, upsert, remove, history, itemNames, customers } = useInvoices()
+const { invoices, load, get, blank, upsert, remove, history, itemNames, customers } = useInvoices()
 
 const id = route.params.id as string
+try {
+  await load(true) // ambil data terbaru dari database (nomor invoice berikutnya, saran barang)
+} catch {}
 const existing = id === 'new' ? null : get(id)
 if (id !== 'new' && !existing) navigateTo('/')
 const draft = ref<Invoice>(existing ? JSON.parse(JSON.stringify(existing)) : blank())
@@ -52,7 +55,16 @@ async function save(goHome = true) {
   }
   draft.value.items = draft.value.items.filter((i) => i.name.trim() || i.qty || i.price)
   if (!draft.value.items.length) addItem()
-  upsert(JSON.parse(JSON.stringify(draft.value)))
+  try {
+    await upsert(JSON.parse(JSON.stringify(draft.value)))
+  } catch (e: any) {
+    if (e?.statusCode === 409 || e?.response?.status === 409) {
+      await notify({ title: 'Nomor sudah dipakai', message: `${draft.value.number} sudah dipakai invoice lain. Ganti dengan nomor yang berbeda.`, tone: 'danger' })
+    } else if (e?.statusCode !== 401 && e?.response?.status !== 401) {
+      await notify({ title: 'Gagal menyimpan', message: 'Periksa koneksi internet lalu coba lagi.', tone: 'danger' })
+    }
+    return false
+  }
   if (goHome) navigateTo('/')
   return true
 }
@@ -64,9 +76,12 @@ async function del() {
     confirmText: 'Ya, Hapus',
     tone: 'danger',
   })
-  if (ok) {
-    remove(draft.value.id)
+  if (!ok) return
+  try {
+    await remove(draft.value.id)
     navigateTo('/')
+  } catch {
+    await notify({ title: 'Gagal menghapus', message: 'Periksa koneksi internet lalu coba lagi.', tone: 'danger' })
   }
 }
 

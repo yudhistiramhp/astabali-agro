@@ -1,20 +1,31 @@
 import type { Invoice } from '~/utils/invoice'
 
-const KEY = 'astabali-invoices-v1'
+const LEGACY_KEY = 'astabali-invoices-v1' // data lama di localStorage
 
 export function useInvoices() {
-  const invoices = useState<Invoice[]>('invoices', () => {
-    if (import.meta.client) {
-      try {
-        return JSON.parse(localStorage.getItem(KEY) || '[]')
-      } catch {
-        return []
-      }
-    }
-    return []
-  })
+  const invoices = useState<Invoice[]>('invoices', () => [])
+  const loaded = useState('invoices-loaded', () => false)
+  const authed = useState<boolean | null>('authed', () => null)
 
-  const persist = () => localStorage.setItem(KEY, JSON.stringify(invoices.value))
+  async function api<T>(url: string, opts: any = {}): Promise<T> {
+    try {
+      return await $fetch<T>(url, opts)
+    } catch (e: any) {
+      if (e?.statusCode === 401 || e?.response?.status === 401) {
+        authed.value = false
+        await navigateTo('/login')
+      }
+      throw e
+    }
+  }
+
+  async function load(force = false) {
+    if (loaded.value && !force) return
+    const data = await api<unknown>('/api/invoices')
+    if (!Array.isArray(data)) throw new Error('Respons server tidak valid (bukan daftar invoice)')
+    invoices.value = data as Invoice[]
+    loaded.value = true
+  }
 
   const get = (id: string) => invoices.value.find((i) => i.id === id) || null
 
@@ -41,24 +52,59 @@ export function useInvoices() {
     }
   }
 
-  const upsert = (inv: Invoice) => {
+  // Melempar error (409 = nomor sudah dipakai) kalau gagal
+  async function upsert(inv: Invoice) {
+    await api(`/api/invoices/${inv.id}`, { method: 'PUT', body: inv })
     const idx = invoices.value.findIndex((i) => i.id === inv.id)
     if (idx >= 0) invoices.value[idx] = inv
     else invoices.value.unshift(inv)
-    persist()
   }
 
-  const remove = (id: string) => {
+  async function remove(id: string) {
+    await api(`/api/invoices/${id}`, { method: 'DELETE' })
     invoices.value = invoices.value.filter((i) => i.id !== id)
-    persist()
   }
 
-  const setStatus = (id: string, status: Invoice['status']) => {
+  async function setStatus(id: string, status: Invoice['status']) {
     const inv = get(id)
     if (!inv) return
-    inv.status = status
-    inv.paidAt = status === 'paid' ? todayISO() : null
-    persist()
+    await upsert({ ...inv, status, paidAt: status === 'paid' ? todayISO() : null })
+  }
+
+  async function logout() {
+    await $fetch('/api/logout', { method: 'POST' })
+    authed.value = false
+    loaded.value = false
+    invoices.value = []
+    await navigateTo('/login')
+  }
+
+  // ---- Pindahkan data lama dari localStorage ke database ----
+  function legacy(): Invoice[] {
+    if (!import.meta.client) return []
+    try {
+      const list = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]')
+      return Array.isArray(list) ? list : []
+    } catch {
+      return []
+    }
+  }
+
+  async function importLegacy() {
+    const list = legacy()
+    let ok = 0
+    let skipped = 0
+    for (const inv of list) {
+      try {
+        await api(`/api/invoices/${inv.id}`, { method: 'PUT', body: inv })
+        ok++
+      } catch {
+        skipped++ // biasanya nomor kembar
+      }
+    }
+    if (!skipped) localStorage.removeItem(LEGACY_KEY)
+    await load(true)
+    return { ok, skipped }
   }
 
   // Nama barang -> unit & harga terakhir (saran otomatis, harga tetap bisa diubah)
@@ -84,5 +130,8 @@ export function useInvoices() {
     [...new Set(invoices.value.map((i) => i.customer.trim()).filter(Boolean))].sort(),
   )
 
-  return { invoices, get, blank, upsert, remove, setStatus, history, itemNames, customers }
+  return {
+    invoices, load, get, blank, upsert, remove, setStatus, logout,
+    legacy, importLegacy, history, itemNames, customers,
+  }
 }

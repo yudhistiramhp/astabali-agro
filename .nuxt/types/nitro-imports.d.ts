@@ -1,4 +1,5 @@
 declare global {
+  const COOKIE: typeof import('../../server/utils/auth').COOKIE
   const H3Error: typeof import('../../node_modules/h3/dist/index').H3Error
   const H3Event: typeof import('../../node_modules/h3/dist/index').H3Event
   const __buildAssetsURL: typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/utils/paths').buildAssetsURL
@@ -40,6 +41,7 @@ declare global {
   const defineWebSocketHandler: typeof import('../../node_modules/h3/dist/index').defineWebSocketHandler
   const deleteCookie: typeof import('../../node_modules/h3/dist/index').deleteCookie
   const dynamicEventHandler: typeof import('../../node_modules/h3/dist/index').dynamicEventHandler
+  const ensureTable: typeof import('../../server/utils/db').ensureTable
   const eventHandler: typeof import('../../node_modules/h3/dist/index').eventHandler
   const fetchWithEvent: typeof import('../../node_modules/h3/dist/index').fetchWithEvent
   const fromNodeMiddleware: typeof import('../../node_modules/h3/dist/index').fromNodeMiddleware
@@ -81,6 +83,7 @@ declare global {
   const isStream: typeof import('../../node_modules/h3/dist/index').isStream
   const isWebResponse: typeof import('../../node_modules/h3/dist/index').isWebResponse
   const lazyEventHandler: typeof import('../../node_modules/h3/dist/index').lazyEventHandler
+  const makeToken: typeof import('../../server/utils/auth').makeToken
   const nitroPlugin: typeof import('../../node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
   const parseCookies: typeof import('../../node_modules/h3/dist/index').parseCookies
   const promisifyNodeListener: typeof import('../../node_modules/h3/dist/index').promisifyNodeListener
@@ -91,6 +94,7 @@ declare global {
   const readRawBody: typeof import('../../node_modules/h3/dist/index').readRawBody
   const readValidatedBody: typeof import('../../node_modules/h3/dist/index').readValidatedBody
   const removeResponseHeader: typeof import('../../node_modules/h3/dist/index').removeResponseHeader
+  const requireAuth: typeof import('../../server/utils/auth').requireAuth
   const runTask: typeof import('../../node_modules/nitropack/dist/runtime/internal/task').runTask
   const sanitizeStatusCode: typeof import('../../node_modules/h3/dist/index').sanitizeStatusCode
   const sanitizeStatusMessage: typeof import('../../node_modules/h3/dist/index').sanitizeStatusMessage
@@ -124,7 +128,9 @@ declare global {
   const useNitroApp: typeof import('../../node_modules/nitropack/dist/runtime/internal/app').useNitroApp
   const useRuntimeConfig: typeof import('../../node_modules/nitropack/dist/runtime/internal/config').useRuntimeConfig
   const useSession: typeof import('../../node_modules/h3/dist/index').useSession
+  const useSql: typeof import('../../server/utils/db').useSql
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage').useStorage
+  const validToken: typeof import('../../server/utils/auth').validToken
   const writeEarlyHints: typeof import('../../node_modules/h3/dist/index').writeEarlyHints
 }
 // for type re-export
@@ -148,3 +154,5 @@ export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils'
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'E:/code/claude/new update/astabali-agro/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from 'E:/code/claude/new update/astabali-agro/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { useAppConfig } from 'E:/code/claude/new update/astabali-agro/node_modules/@nuxt/nitro-server/dist/runtime/utils/app-config';
+export { COOKIE, makeToken, validToken, requireAuth } from 'E:/code/claude/new update/astabali-agro/server/utils/auth';
+export { useSql, ensureTable } from 'E:/code/claude/new update/astabali-agro/server/utils/db';

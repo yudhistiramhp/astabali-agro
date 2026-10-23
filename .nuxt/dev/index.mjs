@@ -1,12 +1,13 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
-import nodeCrypto from 'node:crypto';
+import nodeCrypto, { timingSafeEqual, createHmac } from 'node:crypto';
 import { isMainThread, parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestProtocol, getRequestHost, getRequestURL, readRawBody, getRequestHeader, isError, setResponseHeaders, setResponseStatus, send, setResponseHeader, appendResponseHeader, getResponseHeader, getRequestHeaders, removeResponseHeader, writeEarlyHints, getQuery as getQuery$1, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readBody, getRequestIP, toWebRequest } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestProtocol, getRequestHost, getRequestURL, readRawBody, getRequestHeader, isError, setResponseHeaders, setResponseStatus, send, setResponseHeader, appendResponseHeader, getResponseHeader, getRequestHeaders, removeResponseHeader, writeEarlyHints, getQuery as getQuery$1, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readBody, getCookie, setCookie, deleteCookie, getRequestIP, toWebRequest } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/@vue/shared/dist/shared.cjs.js';
 import viteNodeEntry_mjs from 'file:///E:/code/claude/new%20update/astabali-agro/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file:///E:/code/claude/new%20update/astabali-agro/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
+import { neon } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/@neondatabase/serverless/index.mjs';
 import { stringify, uneval } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/devalue/src/index.js';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/ufo/dist/index.mjs';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://E:/code/claude/new%20update/astabali-agro/node_modules/vue-bundle-renderer/dist/runtime.mjs';
@@ -1078,7 +1079,7 @@ const renderSSRHeadOptions = {"omitLineBreaks":true};
 
 const NUXT_PRERENDER_NO_SSR_ROUTES = ["/index.html","/200.html","/404.html"];
 const NUXT_NO_SCRIPTS_PATTERNS = [];
-const NUXT_PAGE_PATTERNS = ["/invoice/:id","/"];
+const NUXT_PAGE_PATTERNS = ["/invoice/:id","/login","/"];
 const NUXT_SSR_STREAMING = false;
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 const appRootTag = "div";
@@ -2343,7 +2344,22 @@ _Z4Vm0BJMJeyU_KFYzGBgSOBoZ4JOQn4jYmko_KtDwU,
 _LB91z6Ht2T49ncvhFWMKIA26eT4mdBc7tIFl06yLKKs
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"23590-JSIow25J0W/Oiy1ytGsxfefWYQo\"",
+    "mtime": "2026-10-23T08:33:18.203Z",
+    "size": 144784,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"80a03-LsQvUqt3fJikrOzn9sl7dJyEQuQ\"",
+    "mtime": "2026-10-23T08:33:18.203Z",
+    "size": 526851,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3238,11 +3254,23 @@ async function getIslandContext(event) {
 	};
 }
 
+const _lazy_92VoyS = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_I3upnU = () => Promise.resolve().then(function () { return _id__put$1; });
+const _lazy_rx5Y8M = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_ZDxtrg = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_V4m_pM = () => Promise.resolve().then(function () { return logout_post$1; });
+const _lazy_mA2NfR = () => Promise.resolve().then(function () { return me_get$1; });
 const _lazy_FZQYtS = () => Promise.resolve().then(function () { return renderer$1; });
 const _lazy_zjyAui = () => Promise.resolve().then(function () { return errorChannel; });
 
 const handlers = [
   { route: '', handler: _rWdGSq, lazy: false, middleware: true, method: undefined },
+  { route: '/api/invoices/:id', handler: _lazy_92VoyS, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/invoices/:id', handler: _lazy_I3upnU, lazy: true, middleware: false, method: "put" },
+  { route: '/api/invoices', handler: _lazy_rx5Y8M, lazy: true, middleware: false, method: "get" },
+  { route: '/api/login', handler: _lazy_ZDxtrg, lazy: true, middleware: false, method: "post" },
+  { route: '/api/logout', handler: _lazy_V4m_pM, lazy: true, middleware: false, method: "post" },
+  { route: '/api/me', handler: _lazy_mA2NfR, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_FZQYtS, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_dev__/error/**', handler: _lazy_zjyAui, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
@@ -3612,6 +3640,158 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles,
   inlinedCSS: inlinedCSS
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const COOKIE = "astabali_session";
+const secret = () => process.env.SESSION_SECRET || "";
+const sign = (v) => createHmac("sha256", secret()).update(v).digest("hex");
+function makeToken() {
+  const exp = String(Date.now() + 30 * 24 * 3600 * 1e3);
+  return `${exp}.${sign(exp)}`;
+}
+function validToken(token) {
+  if (!token || !secret()) return false;
+  const [exp, sig] = token.split(".");
+  if (!exp || !sig) return false;
+  const a = Buffer.from(sig);
+  const b = Buffer.from(sign(exp));
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return false;
+  return Number(exp) > Date.now();
+}
+function requireAuth(event) {
+  if (!validToken(getCookie(event, COOKIE))) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+}
+
+let _sql = null;
+function useSql() {
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  if (!url) throw createError({ statusCode: 500, statusMessage: "DATABASE_URL belum diatur" });
+  _sql != null ? _sql : _sql = neon(url);
+  return _sql;
+}
+let ready = null;
+function ensureTable() {
+  ready != null ? ready : ready = (async () => {
+    const sql = useSql();
+    await sql`
+      CREATE TABLE IF NOT EXISTS invoices (
+        id text PRIMARY KEY,
+        number text UNIQUE NOT NULL,
+        data jsonb NOT NULL,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `;
+  })().catch((e) => {
+    ready = null;
+    throw e;
+  });
+  return ready;
+}
+
+const _id__delete = defineEventHandler(async (event) => {
+  requireAuth(event);
+  await ensureTable();
+  const id = getRouterParam(event, "id");
+  const sql = useSql();
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  return { ok: true };
+});
+
+const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put = defineEventHandler(async (event) => {
+  requireAuth(event);
+  await ensureTable();
+  const id = getRouterParam(event, "id");
+  const inv = await readBody(event);
+  if (!inv || inv.id !== id || typeof inv.number !== "string" || !inv.number.trim() || !Array.isArray(inv.items)) {
+    throw createError({ statusCode: 400, statusMessage: "Data invoice tidak valid" });
+  }
+  const sql = useSql();
+  try {
+    await sql`
+      INSERT INTO invoices (id, number, data)
+      VALUES (${id}, ${inv.number.trim()}, ${JSON.stringify(inv)}::jsonb)
+      ON CONFLICT (id) DO UPDATE
+        SET number = EXCLUDED.number, data = EXCLUDED.data, updated_at = now()
+    `;
+  } catch (e) {
+    if ((e == null ? void 0 : e.code) === "23505") {
+      throw createError({ statusCode: 409, statusMessage: "Nomor invoice sudah dipakai" });
+    }
+    throw e;
+  }
+  return { ok: true };
+});
+
+const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get = defineEventHandler(async (event) => {
+  requireAuth(event);
+  await ensureTable();
+  const sql = useSql();
+  const rows = await sql`SELECT data FROM invoices ORDER BY updated_at DESC`;
+  return rows.map((r) => r.data);
+});
+
+const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const login_post = defineEventHandler(async (event) => {
+  var _a;
+  const real = process.env.APP_PASSWORD;
+  if (!real || !process.env.SESSION_SECRET) {
+    throw createError({ statusCode: 500, statusMessage: "APP_PASSWORD / SESSION_SECRET belum diatur" });
+  }
+  const body = await readBody(event);
+  const a = Buffer.from(String((_a = body == null ? void 0 : body.password) != null ? _a : ""));
+  const b = Buffer.from(real);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    throw createError({ statusCode: 401, statusMessage: "Password salah" });
+  }
+  setCookie(event, COOKIE, makeToken(), {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30
+  });
+  return { ok: true };
+});
+
+const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: login_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const logout_post = defineEventHandler((event) => {
+  deleteCookie(event, COOKIE, { path: "/" });
+  return { ok: true };
+});
+
+const logout_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: logout_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const me_get = defineEventHandler((event) => {
+  requireAuth(event);
+  return { ok: true };
+});
+
+const me_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: me_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 //#region src/app/internal/tracing.ts
