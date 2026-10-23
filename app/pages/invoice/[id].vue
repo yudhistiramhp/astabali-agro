@@ -80,12 +80,31 @@ const updateScale = () => {
   const w = previewBox.value?.clientWidth ?? window.innerWidth - 32
   scale.value = Math.min(1, (w - 16) / 794)
 }
+const paperH = ref(1120)
+let ro: ResizeObserver | null = null
 onMounted(() => {
   updateScale()
   window.addEventListener('resize', updateScale)
+  const el = paperRef.value?.$el
+  if (el) {
+    paperH.value = el.offsetHeight
+    ro = new ResizeObserver(() => (paperH.value = el.offsetHeight))
+    ro.observe(el)
+  }
 })
-onBeforeUnmount(() => window.removeEventListener('resize', updateScale))
-const previewStyle = computed(() => (exporting.value ? {} : { zoom: scale.value }))
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateScale)
+  ro?.disconnect()
+})
+// Pakai transform (bukan zoom) supaya render di Safari iPhone konsisten
+const frameStyle = computed(() =>
+  exporting.value
+    ? {}
+    : { width: 794 * scale.value + 'px', height: paperH.value * scale.value + 'px', overflow: 'hidden', margin: '0 auto' },
+)
+const paperStyle = computed(() =>
+  exporting.value ? {} : { width: '794px', transform: `scale(${scale.value})`, transformOrigin: 'top left' },
+)
 
 async function makePdf(): Promise<File> {
   // @ts-ignore html2pdf.js tidak punya type
@@ -218,8 +237,10 @@ async function exportPdf(share: boolean) {
 
     <h2>Preview</h2>
     <div ref="previewBox" class="preview-box">
-      <div class="paper-shadow" :style="previewStyle">
-        <InvoicePaper ref="paperRef" :invoice="draft" />
+      <div class="paper-shadow" :style="frameStyle">
+        <div :style="paperStyle">
+          <InvoicePaper ref="paperRef" :invoice="draft" />
+        </div>
       </div>
     </div>
 

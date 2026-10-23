@@ -114,6 +114,8 @@ const t = computed(() => totals(props.invoice))
   color: #111;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 .head { display: flex; justify-content: space-between; align-items: flex-start; position: relative; }
 .brand { display: flex; align-items: center; gap: 26px; }
