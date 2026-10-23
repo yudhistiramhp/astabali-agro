@@ -181,7 +181,7 @@ async function exportPdf(share: boolean) {
     <div class="card">
       <div style="margin-bottom: 10px">
         <label>Bill To (Customer)</label>
-        <input v-model="draft.customer" list="customer-names" placeholder="Pirates Bay Café" />
+        <input v-model="draft.customer" list="customer-names" placeholder="Customer" />
       </div>
       <div class="grid2" style="margin-bottom: 10px">
         <div>
