@@ -66,7 +66,11 @@ export const fmtFileDate = (iso: string) => {
   return `${d} ${MONTHS[Number(m) - 1]} ${y!.slice(2)}`
 }
 
-export const itemAmount = (i: InvoiceItem) => Math.round((i.qty || 0) * (i.price || 0))
+// Harga selalu per kg. Satuan gram: qty 300 gr = 0,3 kg.
+export const unitFactor = (unit: string) => (unit === 'gr' ? 0.001 : 1)
+
+export const itemAmount = (i: InvoiceItem) =>
+  Math.round((i.qty || 0) * unitFactor(i.unit) * (i.price || 0))
 
 export const totals = (inv: Invoice) => {
   const subtotal = inv.items.reduce((s, i) => s + itemAmount(i), 0)

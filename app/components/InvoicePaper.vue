@@ -17,14 +17,6 @@ const t = computed(() => totals(props.invoice))
         <div class="brand-name">{{ BUSINESS.name }}</div>
       </div>
       <div class="title">INVOICE</div>
-      <div class="stamp-wrap">
-        <div class="stamp" :class="invoice.status">
-          {{ invoice.status === 'paid' ? 'LUNAS' : 'BELUM LUNAS' }}
-        </div>
-        <div v-if="invoice.status === 'paid' && invoice.paidAt" class="paid-date">
-          Dibayar {{ fmtDate(invoice.paidAt) }}
-        </div>
-      </div>
     </div>
     <div class="contact">
       <div>{{ BUSINESS.address }}</div>
@@ -69,7 +61,7 @@ const t = computed(() => totals(props.invoice))
       <tbody>
         <tr v-for="(it, idx) in rows" :key="idx">
           <td>{{ it.name }} ({{ it.unit }})</td>
-          <td class="c">{{ fmtQty(it.qty || 0) }}</td>
+          <td class="c">{{ it.unit === 'gr' ? fmtNum(it.qty || 0) : fmtQty(it.qty || 0) }}</td>
           <td class="r">{{ fmtNum(it.price || 0) }}</td>
           <td class="r">{{ fmtNum(itemAmount(it)) }}</td>
         </tr>
@@ -121,15 +113,8 @@ const t = computed(() => totals(props.invoice))
 .brand { display: flex; align-items: center; gap: 26px; }
 .logo { width: 76px; height: auto; }
 .brand-name { font-size: 30px; font-weight: 700; color: var(--navy); }
-.stamp-wrap { position: absolute; right: 0; top: 78px; text-align: right; }
 .title { font-size: 42px; color: var(--navy); margin-top: 10px; }
-.stamp {
-  display: inline-block; padding: 3px 14px; border: 3px solid; border-radius: 6px;
-  font-size: 20px; font-weight: 700; letter-spacing: 2px; transform: rotate(-6deg);
-}
-.stamp.paid { color: #1a7f4b; }
-.stamp.unpaid { color: #c62828; }
-.paid-date { font-size: 11px; color: #1a7f4b; margin-top: 6px; }
+
 .contact { font-weight: 700; line-height: 1.55; margin-top: 4px; }
 
 .meta { display: flex; justify-content: space-between; margin-top: 26px; }

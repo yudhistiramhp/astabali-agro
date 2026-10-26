@@ -109,6 +109,7 @@ declare global {
   const totals: typeof import('../../app/utils/invoice').totals
   const triggerRef: typeof import('vue').triggerRef
   const tryUseNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').tryUseNuxtApp
+  const unitFactor: typeof import('../../app/utils/invoice').unitFactor
   const unref: typeof import('vue').unref
   const updateAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').updateAppConfig
   const useAnnouncer: typeof import('../../node_modules/nuxt/dist/app/composables/announcer').useAnnouncer
@@ -340,6 +341,7 @@ declare module 'vue' {
     readonly totals: UnwrapRef<typeof import('../../app/utils/invoice')['totals']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryUseNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['tryUseNuxtApp']>
+    readonly unitFactor: UnwrapRef<typeof import('../../app/utils/invoice')['unitFactor']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly updateAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['updateAppConfig']>
     readonly useAnnouncer: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/announcer')['useAnnouncer']>

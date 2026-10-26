@@ -181,7 +181,7 @@ async function exportPdf(share: boolean) {
     <div class="card">
       <div style="margin-bottom: 10px">
         <label>Bill To (Customer)</label>
-        <input v-model="draft.customer" list="customer-names" placeholder="Customer" />
+        <input v-model="draft.customer" list="customer-names" placeholder="Pirates Bay Café" />
       </div>
       <div class="grid2" style="margin-bottom: 10px">
         <div>
@@ -228,11 +228,13 @@ async function exportPdf(share: boolean) {
             </select>
           </div>
           <div>
-            <label>Harga satuan (Rp)</label>
+            <label>{{ it.unit === 'gr' || it.unit === 'kg' ? 'Harga per kg (Rp)' : 'Harga satuan (Rp)' }}</label>
             <input v-model.number="it.price" type="number" inputmode="numeric" step="any" min="0" />
           </div>
         </div>
-        <div class="item-amt">{{ fmtRp(itemAmount(it)) }}</div>
+        <div class="item-amt">
+          <span v-if="it.unit === 'gr' && it.qty" style="font-weight: 400; color: #5a6472">{{ fmtQty(it.qty * unitFactor(it.unit)) }} kg · </span>{{ fmtRp(itemAmount(it)) }}
+        </div>
       </div>
       <button class="btn" style="width: 100%" @click="addItem">+ Tambah barang</button>
     </div>
