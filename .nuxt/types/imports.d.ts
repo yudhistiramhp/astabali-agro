@@ -3,7 +3,7 @@ export {}
 declare global {
   const $fetch: typeof import('../fetch').$fetch
   const BUSINESS: typeof import('../../app/utils/invoice').BUSINESS
-  const UNITS: typeof import('../../app/utils/invoice').UNITS
+  const DEFAULT_UNITS: typeof import('../../app/utils/invoice').DEFAULT_UNITS
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
   const addDaysISO: typeof import('../../app/utils/invoice').addDaysISO
   const addRouteMiddleware: typeof import('../../node_modules/nuxt/dist/app/composables/router').addRouteMiddleware
@@ -56,6 +56,8 @@ declare global {
   const isVue2: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue2
   const isVue3: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue3
   const itemAmount: typeof import('../../app/utils/invoice').itemAmount
+  const itemFactor: typeof import('../../app/utils/invoice').itemFactor
+  const legacyFactor: typeof import('../../app/utils/invoice').legacyFactor
   const loadPayload: typeof import('../../node_modules/nuxt/dist/app/composables/payload').loadPayload
   const markRaw: typeof import('vue').markRaw
   const navigateTo: typeof import('../../node_modules/nuxt/dist/app/composables/router').navigateTo
@@ -109,7 +111,6 @@ declare global {
   const totals: typeof import('../../app/utils/invoice').totals
   const triggerRef: typeof import('vue').triggerRef
   const tryUseNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').tryUseNuxtApp
-  const unitFactor: typeof import('../../app/utils/invoice').unitFactor
   const unref: typeof import('vue').unref
   const updateAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').updateAppConfig
   const useAnnouncer: typeof import('../../node_modules/nuxt/dist/app/composables/announcer').useAnnouncer
@@ -200,6 +201,7 @@ declare global {
   const useState: typeof import('../../node_modules/nuxt/dist/app/composables/state').useState
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTransitionState: typeof import('vue').useTransitionState
+  const useUnits: typeof import('../../app/composables/useUnits').useUnits
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -226,7 +228,7 @@ declare global {
   export type { DialogTone, DialogOptions } from '../../app/composables/useDialog'
   import('../../app/composables/useDialog')
   // @ts-ignore
-  export type { InvoiceItem, Invoice } from '../../app/utils/invoice'
+  export type { Unit, InvoiceItem, Invoice } from '../../app/utils/invoice'
   import('../../app/utils/invoice')
 }
 // for vue template auto import
@@ -235,7 +237,7 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly $fetch: UnwrapRef<typeof import('../fetch')['$fetch']>
     readonly BUSINESS: UnwrapRef<typeof import('../../app/utils/invoice')['BUSINESS']>
-    readonly UNITS: UnwrapRef<typeof import('../../app/utils/invoice')['UNITS']>
+    readonly DEFAULT_UNITS: UnwrapRef<typeof import('../../app/utils/invoice')['DEFAULT_UNITS']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
     readonly addDaysISO: UnwrapRef<typeof import('../../app/utils/invoice')['addDaysISO']>
     readonly addRouteMiddleware: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['addRouteMiddleware']>
@@ -288,6 +290,8 @@ declare module 'vue' {
     readonly isVue2: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue2']>
     readonly isVue3: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue3']>
     readonly itemAmount: UnwrapRef<typeof import('../../app/utils/invoice')['itemAmount']>
+    readonly itemFactor: UnwrapRef<typeof import('../../app/utils/invoice')['itemFactor']>
+    readonly legacyFactor: UnwrapRef<typeof import('../../app/utils/invoice')['legacyFactor']>
     readonly loadPayload: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['loadPayload']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['navigateTo']>
@@ -341,7 +345,6 @@ declare module 'vue' {
     readonly totals: UnwrapRef<typeof import('../../app/utils/invoice')['totals']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryUseNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['tryUseNuxtApp']>
-    readonly unitFactor: UnwrapRef<typeof import('../../app/utils/invoice')['unitFactor']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly updateAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['updateAppConfig']>
     readonly useAnnouncer: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/announcer')['useAnnouncer']>
@@ -432,6 +435,7 @@ declare module 'vue' {
     readonly useState: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/state')['useState']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTransitionState: UnwrapRef<typeof import('vue')['useTransitionState']>
+    readonly useUnits: UnwrapRef<typeof import('../../app/composables/useUnits')['useUnits']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>

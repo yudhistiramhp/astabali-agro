@@ -1079,7 +1079,7 @@ const renderSSRHeadOptions = {"omitLineBreaks":true};
 
 const NUXT_PRERENDER_NO_SSR_ROUTES = ["/index.html","/200.html","/404.html"];
 const NUXT_NO_SCRIPTS_PATTERNS = [];
-const NUXT_PAGE_PATTERNS = ["/invoice/:id","/login","/"];
+const NUXT_PAGE_PATTERNS = ["/invoice/:id","/login","/units","/"];
 const NUXT_SSR_STREAMING = false;
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 const appRootTag = "div";
@@ -3241,10 +3241,13 @@ async function getIslandContext(event) {
 
 const _lazy_92VoyS = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_I3upnU = () => Promise.resolve().then(function () { return _id__put$1; });
-const _lazy_rx5Y8M = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_rx5Y8M = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_ZDxtrg = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_V4m_pM = () => Promise.resolve().then(function () { return logout_post$1; });
 const _lazy_mA2NfR = () => Promise.resolve().then(function () { return me_get$1; });
+const _lazy_b0VlBF = () => Promise.resolve().then(function () { return _code__delete$1; });
+const _lazy_0f0cja = () => Promise.resolve().then(function () { return _code__put$1; });
+const _lazy_oebQNO = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_FZQYtS = () => Promise.resolve().then(function () { return renderer$1; });
 const _lazy_zjyAui = () => Promise.resolve().then(function () { return errorChannel; });
 
@@ -3256,6 +3259,9 @@ const handlers = [
   { route: '/api/login', handler: _lazy_ZDxtrg, lazy: true, middleware: false, method: "post" },
   { route: '/api/logout', handler: _lazy_V4m_pM, lazy: true, middleware: false, method: "post" },
   { route: '/api/me', handler: _lazy_mA2NfR, lazy: true, middleware: false, method: "get" },
+  { route: '/api/units/:code', handler: _lazy_b0VlBF, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/units/:code', handler: _lazy_0f0cja, lazy: true, middleware: false, method: "put" },
+  { route: '/api/units', handler: _lazy_oebQNO, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_FZQYtS, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_dev__/error/**', handler: _lazy_zjyAui, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
@@ -3668,6 +3674,25 @@ function ensureTable() {
         updated_at timestamptz NOT NULL DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS units (
+        code text PRIMARY KEY,
+        name text NOT NULL,
+        factor numeric NOT NULL DEFAULT 1,
+        sort integer NOT NULL DEFAULT 0
+      )
+    `;
+    await sql`
+      INSERT INTO units (code, name, factor, sort)
+      SELECT * FROM (VALUES
+        ('gr', 'Gram', 0.001, 1),
+        ('kg', 'Kilogram', 1, 2),
+        ('biji', 'Bijian', 1, 3),
+        ('pax', 'Pax', 1, 4),
+        ('sisir', 'Sisir', 1, 5)
+      ) AS v(code, name, factor, sort)
+      WHERE NOT EXISTS (SELECT 1 FROM units)
+    `;
   })().catch((e) => {
     ready = null;
     throw e;
@@ -3719,7 +3744,7 @@ const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
   default: _id__put
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get = defineEventHandler(async (event) => {
+const index_get$2 = defineEventHandler(async (event) => {
   requireAuth(event);
   await ensureTable();
   const sql = useSql();
@@ -3727,9 +3752,9 @@ const index_get = defineEventHandler(async (event) => {
   return rows.map((r) => r.data);
 });
 
-const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get
+  default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post = defineEventHandler(async (event) => {
@@ -3777,6 +3802,64 @@ const me_get = defineEventHandler((event) => {
 const me_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: me_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _code__delete = defineEventHandler(async (event) => {
+  requireAuth(event);
+  await ensureTable();
+  const code = getRouterParam(event, "code") || "";
+  const sql = useSql();
+  await sql`DELETE FROM units WHERE code = ${code}`;
+  return { ok: true };
+});
+
+const _code__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _code__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _code__put = defineEventHandler(async (event) => {
+  var _a;
+  requireAuth(event);
+  await ensureTable();
+  const code = getRouterParam(event, "code") || "";
+  const body = await readBody(event);
+  const name = String((_a = body == null ? void 0 : body.name) != null ? _a : "").trim();
+  const factor = Number(body == null ? void 0 : body.factor);
+  if (!/^[A-Za-z0-9._-]{1,12}$/.test(code) || (body == null ? void 0 : body.code) !== code) {
+    throw createError({ statusCode: 400, statusMessage: "Kode satuan tidak valid" });
+  }
+  if (!name || name.length > 40) {
+    throw createError({ statusCode: 400, statusMessage: "Nama satuan tidak valid" });
+  }
+  if (!Number.isFinite(factor) || factor <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "Pengali harus lebih dari 0" });
+  }
+  const sql = useSql();
+  await sql`
+    INSERT INTO units (code, name, factor, sort)
+    VALUES (${code}, ${name}, ${factor}, COALESCE((SELECT MAX(sort) FROM units), 0) + 1)
+    ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, factor = EXCLUDED.factor
+  `;
+  return { ok: true };
+});
+
+const _code__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _code__put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get = defineEventHandler(async (event) => {
+  requireAuth(event);
+  await ensureTable();
+  const sql = useSql();
+  const rows = await sql`SELECT code, name, factor FROM units ORDER BY sort, code`;
+  return rows.map((r) => ({ code: r.code, name: r.name, factor: Number(r.factor) }));
+});
+
+const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 //#region src/app/internal/tracing.ts

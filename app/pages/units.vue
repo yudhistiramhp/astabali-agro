@@ -96,9 +96,6 @@ async function del(u: { code: string; name: string }) {
       <div style="margin-bottom: 10px">
         <label>Setara berapa kg (pengali)</label>
         <input v-model.number="form.factor" type="number" inputmode="decimal" step="any" min="0" />
-        <small style="color: #5a6472">
-          Harga selalu per kg. Gram = 0,001 · Ons = 0,1 · Kilogram, biji, pax, sisir, ikat = 1.
-        </small>
       </div>
       <div class="row">
         <button class="btn btn-primary" :disabled="busy" @click="submit">{{ editing ? 'Simpan perubahan' : 'Tambah' }}</button>
@@ -120,9 +117,6 @@ async function del(u: { code: string; name: string }) {
           <button class="btn btn-danger" @click="del(u)">Hapus</button>
         </div>
       </div>
-      <small style="color: #5a6472; display: block; margin-top: 8px">
-        Mengubah pengali tidak mempengaruhi invoice yang sudah dibuat, hanya invoice baru.
-      </small>
     </div>
   </div>
 </template>

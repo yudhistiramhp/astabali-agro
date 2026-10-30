@@ -36,5 +36,6 @@ export { definePageMeta, PageMeta } from '#app/composables/pages';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useDialog, DialogTone, DialogOptions } from '../app/composables/useDialog';
 export { useInvoices } from '../app/composables/useInvoices';
-export { BUSINESS, UNITS, todayISO, addDaysISO, fmtNum, fmtQty, fmtRp, fmtDate, fmtFileDate, unitFactor, itemAmount, totals, pdfFileName, InvoiceItem, Invoice } from '../app/utils/invoice';
+export { useUnits } from '../app/composables/useUnits';
+export { BUSINESS, DEFAULT_UNITS, todayISO, addDaysISO, fmtNum, fmtQty, fmtRp, fmtDate, fmtFileDate, legacyFactor, itemFactor, itemAmount, totals, pdfFileName, Unit, InvoiceItem, Invoice } from '../app/utils/invoice';
 export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';
