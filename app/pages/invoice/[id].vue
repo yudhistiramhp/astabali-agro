@@ -4,10 +4,14 @@ import type { Invoice, InvoiceItem } from '~/utils/invoice'
 const route = useRoute()
 const { confirm, notify } = useDialog()
 const { invoices, load, get, blank, upsert, remove, history, itemNames, customers } = useInvoices()
+const { units, loadUnits, factorFor } = useUnits()
 
 const id = route.params.id as string
 try {
   await load(true) // ambil data terbaru dari database (nomor invoice berikutnya, saran barang)
+} catch {}
+try {
+  await loadUnits(true)
 } catch {}
 const existing = id === 'new' ? null : get(id)
 if (id !== 'new' && !existing) navigateTo('/')
@@ -21,8 +25,14 @@ const isDuplicate = computed(() => {
 })
 
 function addItem() {
-  draft.value.items.push({ name: '', unit: 'kg', qty: null, price: null })
+  const u = units.value.find((x) => x.code === 'kg') || units.value[0]
+  draft.value.items.push({ name: '', unit: u?.code ?? 'kg', factor: u?.factor ?? 1, qty: null, price: null })
 }
+function onUnitChange(it: InvoiceItem, code: string) {
+  it.unit = code
+  it.factor = factorFor(code)
+}
+const isWeight = (it: InvoiceItem) => it.unit === 'kg' || itemFactor(it) !== 1
 function removeItem(idx: number) {
   draft.value.items.splice(idx, 1)
   if (!draft.value.items.length) addItem()
@@ -32,6 +42,7 @@ function onNameChange(it: InvoiceItem) {
   const h = history.value.get(it.name.trim().toLowerCase())
   if (h && it.price == null) {
     it.unit = h.unit
+    it.factor = factorFor(h.unit)
     it.price = h.price
   }
 }
@@ -181,7 +192,7 @@ async function exportPdf(share: boolean) {
     <div class="card">
       <div style="margin-bottom: 10px">
         <label>Bill To (Customer)</label>
-        <input v-model="draft.customer" list="customer-names" placeholder="Customer" />
+        <input v-model="draft.customer" list="customer-names" placeholder="Pirates Bay Café" />
       </div>
       <div class="grid2" style="margin-bottom: 10px">
         <div>
@@ -223,17 +234,18 @@ async function exportPdf(share: boolean) {
           </div>
           <div>
             <label>Satuan</label>
-            <select v-model="it.unit">
-              <option v-for="u in UNITS" :key="u.value" :value="u.value">{{ u.label }}</option>
+            <select :value="it.unit" @change="onUnitChange(it, ($event.target as HTMLSelectElement).value)">
+              <option v-for="u in units" :key="u.code" :value="u.code">{{ u.name }} ({{ u.code }})</option>
+              <option v-if="!units.some((u) => u.code === it.unit)" :value="it.unit">{{ it.unit }}</option>
             </select>
           </div>
           <div>
-            <label>{{ it.unit === 'gr' || it.unit === 'kg' ? 'Harga per kg (Rp)' : 'Harga satuan (Rp)' }}</label>
+            <label>{{ isWeight(it) ? 'Harga per kg (Rp)' : 'Harga satuan (Rp)' }}</label>
             <input v-model.number="it.price" type="number" inputmode="numeric" step="any" min="0" />
           </div>
         </div>
         <div class="item-amt">
-          <span v-if="it.unit === 'gr' && it.qty" style="font-weight: 400; color: #5a6472">{{ fmtQty(it.qty * unitFactor(it.unit)) }} kg · </span>{{ fmtRp(itemAmount(it)) }}
+          <span v-if="itemFactor(it) !== 1 && it.qty" style="font-weight: 400; color: #5a6472">{{ fmtQty(it.qty * itemFactor(it)) }} kg · </span>{{ fmtRp(itemAmount(it)) }}
         </div>
       </div>
       <button class="btn" style="width: 100%" @click="addItem">+ Tambah barang</button>

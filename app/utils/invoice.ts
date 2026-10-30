@@ -1,6 +1,13 @@
+export interface Unit {
+  code: string // tampil di invoice, mis. "gr", "kg", "ikat"
+  name: string // nama lengkap, mis. "Gram"
+  factor: number // setara berapa kg (gram = 0.001, kg/biji/pax = 1)
+}
+
 export interface InvoiceItem {
   name: string
   unit: string
+  factor?: number // salinan faktor satuan saat item dibuat (supaya invoice lama tidak berubah)
   qty: number | null
   price: number | null
 }
@@ -26,12 +33,12 @@ export const BUSINESS = {
   contact: 'Agus',
 }
 
-export const UNITS = [
-  { value: 'gr', label: 'Gram (gr)' },
-  { value: 'kg', label: 'Kilogram (kg)' },
-  { value: 'biji', label: 'Bijian (biji)' },
-  { value: 'pax', label: 'Pax' },
-  { value: 'sisir', label: 'Sisir' },
+export const DEFAULT_UNITS: Unit[] = [
+  { code: 'gr', name: 'Gram', factor: 0.001 },
+  { code: 'kg', name: 'Kilogram', factor: 1 },
+  { code: 'biji', name: 'Bijian', factor: 1 },
+  { code: 'pax', name: 'Pax', factor: 1 },
+  { code: 'sisir', name: 'Sisir', factor: 1 },
 ]
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES']
@@ -66,11 +73,14 @@ export const fmtFileDate = (iso: string) => {
   return `${d} ${MONTHS[Number(m) - 1]} ${y!.slice(2)}`
 }
 
-// Harga selalu per kg. Satuan gram: qty 300 gr = 0,3 kg.
-export const unitFactor = (unit: string) => (unit === 'gr' ? 0.001 : 1)
+// Faktor untuk invoice lama yang belum menyimpan faktor di itemnya
+export const legacyFactor = (unit: string) => (unit === 'gr' ? 0.001 : 1)
+
+// Harga per kg: qty × faktor satuan × harga. Contoh: 300 gr (faktor 0,001) = 0,3 kg
+export const itemFactor = (i: InvoiceItem) => i.factor ?? legacyFactor(i.unit)
 
 export const itemAmount = (i: InvoiceItem) =>
-  Math.round((i.qty || 0) * unitFactor(i.unit) * (i.price || 0))
+  Math.round((i.qty || 0) * itemFactor(i) * (i.price || 0))
 
 export const totals = (inv: Invoice) => {
   const subtotal = inv.items.reduce((s, i) => s + itemAmount(i), 0)

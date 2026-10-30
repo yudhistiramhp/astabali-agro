@@ -61,7 +61,7 @@ const t = computed(() => totals(props.invoice))
       <tbody>
         <tr v-for="(it, idx) in rows" :key="idx">
           <td>{{ it.name }} ({{ it.unit }})</td>
-          <td class="c">{{ it.unit === 'gr' ? fmtNum(it.qty || 0) : fmtQty(it.qty || 0) }}</td>
+          <td class="c">{{ itemFactor(it) < 1 ? fmtNum(it.qty || 0) : fmtQty(it.qty || 0) }}</td>
           <td class="r">{{ fmtNum(it.price || 0) }}</td>
           <td class="r">{{ fmtNum(itemAmount(it)) }}</td>
         </tr>

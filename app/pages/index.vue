@@ -140,6 +140,7 @@ async function exportXlsx() {
       <h1>Astabali Agro · Invoice</h1>
       <div class="row">
         <NuxtLink to="/invoice/new" class="btn btn-primary">+ Invoice Baru</NuxtLink>
+        <NuxtLink to="/units" class="btn">Satuan</NuxtLink>
         <button class="btn" @click="logout">Keluar</button>
       </div>
     </div>
